@@ -1,0 +1,29 @@
+name: my_image_picker_example
+description: "Demonstrates how to use the my_image_picker plugin."
+
+publish_to: "none"
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  my_image_picker:
+    path: ../
+
+  cupertino_icons: any
+  permission_handler: any
+  json_view: any
+
+dev_dependencies:
+  integration_test:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: any
+
+flutter:
+  uses-material-design: true
