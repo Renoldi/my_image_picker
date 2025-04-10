@@ -180,7 +180,7 @@ class ImagePickerComponent extends StatelessWidget {
               container != null
                   ? container!((context) {
                     if (onChange != null) {
-                      return isDirectUpload
+                      return isDirectUpload && !value.isUploaded
                           ? prepearingUpload(value, context, onChange!)
                           : SizedBox();
                     } else {

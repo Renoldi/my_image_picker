@@ -45,7 +45,10 @@ class _CustomBuilderExampleState extends State<CustomBuilderExample> {
           children: <Widget>[
             ImagePickerComponent(
               isDirectUpload: true,
-              uploadUrl: 'https://example.com/upload',
+              uploadUrl:
+                  'https://api.inovatrack.com/driver-test/api/Driver/UploadProfilePicture',
+              token:
+                  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9zaWQiOiIyOTI5NiIsIlVzZXJJZCI6IjI5Mjk2IiwiVXNlck5hbWUiOiJkcml2ZXItMSIsIlVzZXJGdWxsTmFtZSI6IlRlc3QgRHJpdmVyIDEiLCJNZW1iZXJJZCI6IjY2ODA1NiIsIk1lbWJlckNvZGUiOiJFTkVSUkVOIiwiTWVtYmVyTmFtZSI6IkVORVJSRU4gVEVDSE5PTE9HSUVTLiBQVCIsIm5iZiI6MTc0NDI1NjMzMywiZXhwIjoxNzQ0ODYxMTMzLCJpYXQiOjE3NDQyNTYzMzN9.G6_8CnVBoTi5u7XTBhnDLg9gbrZWWPWLCJIcO_1LbDQ",
               controller: controller,
               showDescription: false,
               container: (ctx, value) {
