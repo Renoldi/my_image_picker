@@ -1,5 +1,3 @@
-library my_image_picker;
-
 import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
@@ -181,7 +179,13 @@ class ImagePickerComponent extends StatelessWidget {
           child:
               container != null
                   ? container!((context) {
-                    return widgetBuilder(value, context);
+                    if (onChange != null) {
+                      return isDirectUpload
+                          ? prepearingUpload(value, context, onChange!)
+                          : SizedBox();
+                    } else {
+                      return const SizedBox();
+                    }
                   }, value)
                   : Center(
                     child: Container(
@@ -443,43 +447,47 @@ class ImagePickerComponent extends StatelessWidget {
         children: [
           immageWidget(value),
           Container(color: Colors.white.withValues(alpha: 0.8)),
-          Center(
-            child: Container(
-              margin: EdgeInsets.only(
-                left: (containerWidth ?? 100) * 10 / 100,
-                right: (containerWidth ?? 100) * 10 / 100,
-              ),
-              padding: const EdgeInsets.all(0),
-              width: containerWidth,
-              height: 20,
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                borderRadius: const BorderRadius.all(Radius.circular(5)),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.primary,
-                  width: 1,
-                ),
-              ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: AnimatedContainer(
-                  duration: Duration(
-                    milliseconds: value.onProgressUpload ? 500 : 1,
+          value.onProgressUpload
+              ? Center(
+                child: Container(
+                  margin: EdgeInsets.only(
+                    left: (containerWidth ?? 100) * 10 / 100,
+                    right: (containerWidth ?? 100) * 10 / 100,
                   ),
-                  width:
-                      (containerWidth ?? 100) *
-                      (controller.percentageUpload / 100),
+                  padding: const EdgeInsets.all(0),
+                  width: containerWidth,
+                  height: 20,
                   decoration: BoxDecoration(
-                    color:
-                        value.state != ImagePickerComponentState.Error
-                            ? Colors.green
-                            : Theme.of(context).colorScheme.error,
+                    color: Colors.transparent,
                     borderRadius: const BorderRadius.all(Radius.circular(5)),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 1,
+                    ),
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: AnimatedContainer(
+                      duration: Duration(
+                        milliseconds: value.onProgressUpload ? 500 : 1,
+                      ),
+                      width:
+                          (containerWidth ?? 100) *
+                          (controller.percentageUpload / 100),
+                      decoration: BoxDecoration(
+                        color:
+                            value.state != ImagePickerComponentState.Error
+                                ? Colors.green
+                                : Theme.of(context).colorScheme.error,
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(5),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ),
+              )
+              : Container(),
           Align(
             alignment: Alignment.topCenter,
             child:

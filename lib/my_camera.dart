@@ -11,11 +11,11 @@ class CameraComponent extends StatefulWidget {
   final Color? loadingColor;
 
   const CameraComponent({
-    Key? key,
+    super.key,
     required this.controller,
     this.onConfirmImage,
     this.loadingColor,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() {

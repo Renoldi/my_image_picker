@@ -44,20 +44,30 @@ class _CustomBuilderExampleState extends State<CustomBuilderExample> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             ImagePickerComponent(
-              isDirectUpload: false,
+              isDirectUpload: true,
+              uploadUrl: 'https://example.com/upload',
               controller: controller,
               showDescription: false,
               container: (ctx, value) {
-                return CircleAvatar(
-                  radius: 50,
-                  backgroundImage:
-                      value.base64 != null
-                          ? MemoryImage(
-                            base64Decode(value.base64!.split(',').last),
-                          )
-                          : Image.asset('assets/avatar.png').image,
+                return Stack(
+                  children: <Widget>[
+                    Align(
+                      alignment: Alignment.center,
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundImage:
+                            value.base64 != null
+                                ? MemoryImage(
+                                  base64Decode(value.base64!.split(',').last),
+                                )
+                                : Image.asset('assets/avatar.png').image,
+                      ),
+                    ),
+                    Align(alignment: Alignment.center, child: ctx(context)),
+                  ],
                 );
               },
+              onChange: (value) {},
               containerHeight: 100,
               containerWidth: 100,
             ),
