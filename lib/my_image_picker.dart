@@ -217,110 +217,116 @@ class ImagePickerComponent extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.red.withValues(alpha: 0),
       builder: (BuildContext context) {
-        return GestureDetector(
-          onTap: () {
-            Navigator.of(context).pop("modal");
-          },
-          child: Container(
-            height: double.infinity,
-            width: double.infinity,
-            color: Colors.grey.withValues(alpha: 0.0),
-            child: Align(
-              alignment: popUpAlign ?? Alignment.bottomCenter,
-              child: Container(
-                height: popUpHeight ?? 170,
-                width: popUpWidth ?? double.infinity,
-                margin:
-                    popUpMargin ??
-                    (popUpAlign == Alignment.center
-                        ? const EdgeInsets.only(left: 10, right: 20)
-                        : null),
-                padding: popUpPadding ?? const EdgeInsets.all(20),
-                decoration:
-                    popUpDecoration ??
-                    BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: const Radius.circular(20),
-                        topRight: const Radius.circular(20),
-                        bottomLeft:
-                            popUpAlign == Alignment.center
-                                ? const Radius.circular(20)
-                                : Radius.zero,
-                        bottomRight:
-                            popUpAlign == Alignment.center
-                                ? const Radius.circular(20)
-                                : Radius.zero,
-                      ),
-                    ),
-                child:
-                    popUpChild != null
-                        ? popUpChild!(
-                          () {
-                            openCamera(context);
-                          },
-                          () {
-                            openGalery(context);
-                          },
-                        )
-                        : Column(
-                          children: <Widget>[
-                            Text(
-                              selectPhotoLabel ?? "Select Photo",
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            const SizedBox(height: 15),
-                            buttonGalery != null
-                                ? buttonGalery!(() {
-                                  openGalery(context);
-                                })
-                                : SizedBox(
-                                  height: 35,
-                                  width: 200,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      openCamera(context);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                                    child: Text(
-                                      openCameraLabel ?? "Camera",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(color: Colors.white),
-                                    ),
-                                  ),
-                                ),
-                            const SizedBox(height: 10),
-                            buttonGalery != null
-                                ? buttonGalery!(() {
-                                  openGalery(context);
-                                })
-                                : SizedBox(
-                                  height: 35,
-                                  width: 200,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      openGalery(context);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                                    child: Text(
-                                      openGaleryLabel ?? "Gallery",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(color: Colors.white),
-                                    ),
-                                  ),
-                                ),
-                          ],
+        return SafeArea(
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop("modal");
+            },
+            child: Container(
+              height: double.infinity,
+              width: double.infinity,
+              color: Colors.grey.withValues(alpha: 0.0),
+              child: Align(
+                alignment: popUpAlign ?? Alignment.bottomCenter,
+                child: Container(
+                  height: popUpHeight ?? 170,
+                  width: popUpWidth ?? double.infinity,
+                  margin:
+                      popUpMargin ??
+                      (popUpAlign == Alignment.center
+                          ? const EdgeInsets.only(left: 10, right: 20)
+                          : null),
+                  padding: popUpPadding ?? const EdgeInsets.all(20),
+                  decoration:
+                      popUpDecoration ??
+                      BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: const Radius.circular(20),
+                          topRight: const Radius.circular(20),
+                          bottomLeft:
+                              popUpAlign == Alignment.center
+                                  ? const Radius.circular(20)
+                                  : Radius.zero,
+                          bottomRight:
+                              popUpAlign == Alignment.center
+                                  ? const Radius.circular(20)
+                                  : Radius.zero,
                         ),
+                      ),
+                  child:
+                      popUpChild != null
+                          ? popUpChild!(
+                            () {
+                              openCamera(context);
+                            },
+                            () {
+                              openGalery(context);
+                            },
+                          )
+                          : Column(
+                            children: <Widget>[
+                              Text(
+                                selectPhotoLabel ?? "Select Photo",
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              const SizedBox(height: 15),
+                              buttonGalery != null
+                                  ? buttonGalery!(() {
+                                    openGalery(context);
+                                  })
+                                  : SizedBox(
+                                    height: 35,
+                                    width: 200,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        openCamera(context);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                      ),
+                                      child: Text(
+                                        openCameraLabel ?? "Camera",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                              const SizedBox(height: 10),
+                              buttonGalery != null
+                                  ? buttonGalery!(() {
+                                    openGalery(context);
+                                  })
+                                  : SizedBox(
+                                    height: 35,
+                                    width: 200,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        openGalery(context);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                      ),
+                                      child: Text(
+                                        openGaleryLabel ?? "Gallery",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                            ],
+                          ),
+                ),
               ),
             ),
           ),
