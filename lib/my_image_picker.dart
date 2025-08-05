@@ -1077,54 +1077,56 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
       isScrollControlled: true,
       backgroundColor: Colors.red.withValues(alpha: 0),
       builder: (BuildContext context) {
-        return GestureDetector(
-          onTap: () {
-            Navigator.of(context).pop("modal");
-          },
-          child: Container(
-            height: double.infinity,
-            width: double.infinity,
-            color: Colors.grey.withValues(alpha: 0.0),
-            child: Align(
-              alignment: popUpAlign ?? Alignment.bottomCenter,
-              child: Container(
-                height: popUpHeight ?? 170,
-                width: popUpWidth ?? double.infinity,
-                margin:
-                    popUpMargin ??
-                    (popUpAlign == Alignment.center
-                        ? const EdgeInsets.only(left: 10, right: 20)
-                        : const EdgeInsets.only(left: 10, right: 20)),
-                padding: popUpPadding ?? const EdgeInsets.all(20),
-                decoration:
-                    popUpDecoration ??
-                    BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: const Radius.circular(20),
-                        topRight: const Radius.circular(20),
-                        bottomLeft:
-                            popUpAlign == Alignment.center
-                                ? const Radius.circular(20)
-                                : Radius.zero,
-                        bottomRight:
-                            popUpAlign == Alignment.center
-                                ? const Radius.circular(20)
-                                : Radius.zero,
+        return SafeArea(
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop("modal");
+            },
+            child: Container(
+              height: double.infinity,
+              width: double.infinity,
+              color: Colors.grey.withValues(alpha: 0.0),
+              child: Align(
+                alignment: popUpAlign ?? Alignment.bottomCenter,
+                child: Container(
+                  height: popUpHeight ?? 170,
+                  width: popUpWidth ?? double.infinity,
+                  margin:
+                      popUpMargin ??
+                      (popUpAlign == Alignment.center
+                          ? const EdgeInsets.only(left: 10, right: 20)
+                          : const EdgeInsets.only(left: 10, right: 20)),
+                  padding: popUpPadding ?? const EdgeInsets.all(20),
+                  decoration:
+                      popUpDecoration ??
+                      BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: const Radius.circular(20),
+                          topRight: const Radius.circular(20),
+                          bottomLeft:
+                              popUpAlign == Alignment.center
+                                  ? const Radius.circular(20)
+                                  : Radius.zero,
+                          bottomRight:
+                              popUpAlign == Alignment.center
+                                  ? const Radius.circular(20)
+                                  : Radius.zero,
+                        ),
                       ),
-                    ),
-                child: Column(
-                  children: <Widget>[
-                    Text(
-                      "$title",
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 15),
-                    Text(
-                      "$body",
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
+                  child: Column(
+                    children: <Widget>[
+                      Text(
+                        "$title",
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 15),
+                      Text(
+                        "$body",
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
