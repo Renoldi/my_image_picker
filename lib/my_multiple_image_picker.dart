@@ -56,6 +56,9 @@ class MultipleImagePickerComponent extends StatelessWidget {
   final String? saveLabel;
   final String? cancelLabel;
   final String? addDescriptionLabel;
+  final String? permissionTitle;
+  final String? permissionBody;
+  final String? uploadFailedTitle;
 
   MultipleImagePickerComponent({
     super.key,
@@ -106,6 +109,10 @@ class MultipleImagePickerComponent extends StatelessWidget {
     this.saveLabel,
     this.cancelLabel,
     this.addDescriptionLabel,
+    this.permissionTitle = "Permission Required",
+    this.permissionBody =
+        "Please allow this app to access your gallery to continue",
+    this.uploadFailedTitle = "Upload Failed",
   }) {
     if (isDirectUpload) {
       assert(
@@ -177,6 +184,9 @@ class MultipleImagePickerComponent extends StatelessWidget {
                 deleteUrl: deleteUrl,
                 token: token,
                 canReupload: canReupload,
+                permissionTitle: permissionTitle,
+                permissionBody: permissionBody,
+                uploadFailedTitle: uploadFailedTitle,
                 onUploaded: (val) {
                   controller.setState(() {
                     if (onUploaded != null) {

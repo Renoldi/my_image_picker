@@ -55,6 +55,9 @@ class ImagePickerComponent extends StatelessWidget {
   final bool? showDescription;
   final bool useDescriptionFieldAsQuery;
   final bool isDirectUpload;
+  final String? permissionTitle;
+  final String? permissionBody;
+  final String? uploadFailedTitle;
 
   ImagePickerComponent({
     super.key,
@@ -103,6 +106,10 @@ class ImagePickerComponent extends StatelessWidget {
     this.useDescriptionFieldAsQuery = true,
     this.isDirectUpload = false,
     this.descriptionField,
+    this.permissionTitle = "Permission Required",
+    this.permissionBody =
+        "Please allow this app to access your gallery to continue",
+    this.uploadFailedTitle = "Upload Failed",
   }) {
     if (isDirectUpload) {
       assert(
@@ -136,9 +143,8 @@ class ImagePickerComponent extends StatelessWidget {
                         memorySpaceCheck(context).then((result) {
                           if (result == true) {
                             if (value.state !=
-                                ImagePickerComponentState.Disable) {
+                                ImagePickerComponentState.disable) {
                               if (camera == true && galery == true) {
-                                // ignore: use_build_context_synchronously
                                 openModal(context);
                               } else if (camera == true) {
                                 controller.getImages(
@@ -385,9 +391,9 @@ class ImagePickerComponent extends StatelessWidget {
     BuildContext context,
     ImagePickerComponentState state,
   ) {
-    return state == ImagePickerComponentState.Disable
+    return state == ImagePickerComponentState.disable
         ? Theme.of(context).disabledColor
-        : state == ImagePickerComponentState.Error
+        : state == ImagePickerComponentState.error
         ? Theme.of(context).colorScheme.error
         : Theme.of(context).colorScheme.primary;
   }
@@ -418,7 +424,7 @@ class ImagePickerComponent extends StatelessWidget {
     ValueChanged<ImagePickerController> onChange,
   ) {
     if (value.onProgressUpload == false &&
-        value.state == ImagePickerComponentState.Enable) {
+        value.state == ImagePickerComponentState.enable) {
       controller.uploadFile(
         uploadUrl ?? "",
         uploadField ?? "file",
@@ -482,7 +488,7 @@ class ImagePickerComponent extends StatelessWidget {
                           (controller.percentageUpload / 100),
                       decoration: BoxDecoration(
                         color:
-                            value.state != ImagePickerComponentState.Error
+                            value.state != ImagePickerComponentState.error
                                 ? Colors.green
                                 : Theme.of(context).colorScheme.error,
                         borderRadius: const BorderRadius.all(
@@ -497,13 +503,13 @@ class ImagePickerComponent extends StatelessWidget {
           Align(
             alignment: Alignment.topCenter,
             child:
-                value.state == ImagePickerComponentState.Error
+                value.state == ImagePickerComponentState.error
                     ? Container(
                       margin: EdgeInsets.only(
                         top: (containerHeight ?? 100) / 2 + 15,
                       ),
                       child: Text(
-                        "Upload Failed",
+                        uploadFailedTitle ?? "Upload Failed",
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.error,
                         ),
@@ -591,46 +597,8 @@ class ImagePickerComponent extends StatelessWidget {
   }
 
   Future<bool> memorySpaceCheck(BuildContext context) async {
-    // controller.value.loadingController.startLoading();
     bool result = true;
     return result;
-    // return EnvironmentUtil.readDevice.then((value) {
-    //   controller.value.loadingController.stopLoading();
-    //   // if (value.os == "Android") {
-    //   //   if (value?.memory?.freeMemory ??
-    //   //       minimumMemoryRequirement < minimumMemoryRequirement) {
-    //   //     openModalErrorMessage(context,
-    //   //         title: System.data.resource.notEnoughMemory,
-    //   //         body:
-    //   //             "${minimumMemoryRequirement / 1000} GB ${System.data.resource.ofmemoryisrequiredtorunthisprocess}, ${value.memory.freeMemory / 1000} GB ${System.data.resource.ofmemoryremains}");
-    //   //     result = false;
-    //   //   }
-    //   // }
-    //   // print("disk ${value.diskSpace.free ?? 0} < $minimumDiskRequrement");
-    //   // if (value.diskSpace.free ?? 0 < minimumDiskRequrement) {
-    //   //   openModalErrorMessage(context,
-    //   //       title: System.data.resource.notEnoughDisk,
-    //   //       body:
-    //   //           "${minimumDiskRequrement / 1000} GB ${System.data.resource.ofDiskRequiredtorunthisprocess}, ${NumberFormat("#.##").format(value.diskSpace.free ?? 0 / 1000)} GB ${System.data.resource.ofdiskremain}");
-    //   //   result = false;
-    //   // }
-    //   // if (value?.battrey ??
-    //   //     minimumBatteryRequrement < minimumBatteryRequrement) {
-    //   //   openModalErrorMessage(context,
-    //   //       title: System.data.resource.batteryLow,
-    //   //       body:
-    //   //           "${System.data.resource.pleaseConnectTheDevicetoApowerSource}");
-    //   //   result = false;
-    //   // }
-    //   return result;
-    // }).catchError((onError) {
-    //   openModalErrorMessage(
-    //     context,
-    //     title: "${System.data.resource.checkingMemorySpaceError}",
-    //     body: "$onError",
-    //   );
-    //   return false;
-    // });
   }
 
   Future<bool> showModalDescription(BuildContext context) {
@@ -782,11 +750,6 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
     return result;
   }
 
-  /// The `imageQuality` argument modifies the quality of the image, ranging from 0-100
-  /// where 100 is the original/max quality. If `imageQuality` is null, the image with
-  /// the original quality will be returned. Compression is only supportted for certain
-  /// image types such as JPEG. If compression is not supported for the image that is picked,
-  /// an warning message will be logged.
   Future<bool> getImages({
     bool camera = true,
     int imageQuality = 30,
@@ -796,6 +759,8 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
     VoidCallback? onEndGetImage,
     ValueChanged<ImagePickerController>? onChange,
     required bool isDirectUpload,
+    String? permissionTitle,
+    String? permissionBody,
   }) async {
     onStartGetImage?.call();
     try {
@@ -803,17 +768,14 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
       if (camera) {
         PermissionStatus access = await Permission.camera.status;
         if (access.isGranted == true) {
-          // picker = await ImagePicker()
-          //     // ignore: deprecated_member_use
-          //     .getImage(source: ImageSource.camera, imageQuality: imageQuality);
-          // ignore: use_build_context_synchronously
           picker = await openCamrea(value.context!);
         } else {
-          // ignore: use_build_context_synchronously
           openModalErrorMessage(
             value.context!,
-            title: "Permission Required",
-            body: "Please allow this app to access your camera to continue",
+            title: permissionTitle ?? "Permission Required",
+            body:
+                permissionBody ??
+                "Please allow this app to access camera to continue",
           );
         }
       } else {
@@ -827,8 +789,10 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
         } else {
           openModalErrorMessage(
             value.context!,
-            title: "Permission Required",
-            body: "Please allow this app to access your gallery to continue",
+            title: permissionTitle ?? "Permission Required",
+            body:
+                permissionBody ??
+                "Please allow this app to access your gallery to continue",
           );
         }
       }
@@ -868,7 +832,7 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
             value.valueUri = Uri.parse(valueBase64Compress).data!;
             value.isUploaded = false;
             value.uploadedUrl = null;
-            value.state = ImagePickerComponentState.Enable;
+            value.state = ImagePickerComponentState.enable;
             getBase64();
             notifyListeners();
             if (onImageLoaded != null) {
@@ -943,15 +907,6 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
   }
 
   bool validate() {
-    // if (isValid && value.isUploaded) {
-    //   value.state = ImagePickerComponentState.Enable;
-    //   commit();
-    //   return true;
-    // } else {
-    //   value.state = ImagePickerComponentState.Error;
-    //   commit();
-    //   return false;
-    // }
     return true;
   }
 
@@ -1004,7 +959,7 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
               value.onProgressUpload = true;
               value.uploadedSize = uploaded;
               value.fileSize = fileSize;
-              value.state = ImagePickerComponentState.Disable;
+              value.state = ImagePickerComponentState.disable;
               debugPrint(
                 "process... ${value.uploadedSize} ${value.fileSize} $percentageUpload",
               );
@@ -1021,7 +976,7 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
             setUploadedUrl();
             setfilePath();
             setUploadedId();
-            value.state = ImagePickerComponentState.Enable;
+            value.state = ImagePickerComponentState.enable;
             onUploaded?.call(result);
             commit();
             onChange(this);
@@ -1030,7 +985,7 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
             debugPrint(e.toString());
             value.isUploaded = false;
             value.onProgressUpload = false;
-            value.state = ImagePickerComponentState.Error;
+            value.state = ImagePickerComponentState.error;
             commit();
             if (onUploaderror != null) onUploaderror(e);
           });
@@ -1197,15 +1152,8 @@ class ImagePickerValue {
     this.filePath,
     this.uploadedId,
     this.imageDescription,
-    this.state = ImagePickerComponentState.Enable,
+    this.state = ImagePickerComponentState.enable,
   });
 }
 
-enum ImagePickerComponentState {
-  // ignore: constant_identifier_names
-  Enable,
-  // ignore: constant_identifier_names
-  Disable,
-  // ignore: constant_identifier_names
-  Error,
-}
+enum ImagePickerComponentState { enable, disable, error }
