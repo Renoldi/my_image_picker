@@ -4,27 +4,28 @@ version: 0.0.1
 homepage: "my_image_picker"
 
 environment:
-  sdk: ^3.7.2
-  flutter: ">=3.3.0"
+  sdk: ^3.10.8
+  flutter: ">=3.38.9"
 
 dependencies:
+  camera: any
+  cunning_document_scanner: any
   flutter:
     sdk: flutter
-  plugin_platform_interface: any
-  font_awesome_flutter: any
-  camera: any
   flutter_image_compress: any
   flutter_json_view: any
+  font_awesome_flutter: any
   http: any
   image_picker: any
   path_provider: any
   permission_handler: any
   photo_view: any
+  plugin_platform_interface: any
 
 dev_dependencies:
+  flutter_lints: any
   flutter_test:
     sdk: flutter
-  flutter_lints: any
 
 flutter:
   plugin:

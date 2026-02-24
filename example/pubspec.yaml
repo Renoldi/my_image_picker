@@ -4,7 +4,7 @@ description: "Demonstrates how to use the my_image_picker plugin."
 publish_to: "none"
 
 environment:
-  sdk: ^3.7.2
+  sdk: ^3.10.8
 
 dependencies:
   flutter:
@@ -16,6 +16,8 @@ dependencies:
   cupertino_icons: any
   permission_handler: any
   json_view: any
+  logger: any
+
 
 dev_dependencies:
   integration_test:

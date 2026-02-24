@@ -8,6 +8,7 @@ import 'package:my_image_picker/file_service.dart';
 import 'package:my_image_picker/my_camera.dart';
 import 'package:my_image_picker/type.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:cunning_document_scanner/cunning_document_scanner.dart';
 
 class ImagePickerComponent extends StatelessWidget {
   final ImagePickerController controller;
@@ -58,6 +59,7 @@ class ImagePickerComponent extends StatelessWidget {
   final String? permissionTitle;
   final String? permissionBody;
   final String? uploadFailedTitle;
+  final bool isDocumentScanner;
 
   ImagePickerComponent({
     super.key,
@@ -78,8 +80,8 @@ class ImagePickerComponent extends StatelessWidget {
     this.popUpWidth,
     this.onTap,
     this.readOnly = false,
-    @required this.containerHeight,
-    @required this.containerWidth,
+    this.containerHeight,
+    this.containerWidth,
     this.imageQuality,
     this.uploadUrl,
     this.deleteUrl,
@@ -110,6 +112,7 @@ class ImagePickerComponent extends StatelessWidget {
     this.permissionBody =
         "Please allow this app to access your gallery to continue",
     this.uploadFailedTitle = "Upload Failed",
+    this.isDocumentScanner = false,
   }) {
     if (isDirectUpload) {
       assert(
@@ -131,85 +134,81 @@ class ImagePickerComponent extends StatelessWidget {
           };
         }
         return GestureDetector(
-          onTap:
-              readOnly == false
-                  ? onTap != null
-                      ? () {
+          onTap: readOnly == false
+              ? onTap != null
+                    ? () {
                         onTap?.call(controller);
                       }
-                      : () {
+                    : () async {
                         if (!(checkRequirement ?? true)) return;
                         if (value.isUploaded && canReupload == false) return;
-                        memorySpaceCheck(context).then((result) {
-                          if (result == true) {
-                            if (value.state !=
-                                ImagePickerComponentState.disable) {
-                              if (camera == true && galery == true) {
-                                openModal(context);
-                              } else if (camera == true) {
-                                controller.getImages(
-                                  camera: true,
-                                  imageQuality: imageQuality ?? 30,
-                                  onImageLoaded: onImageLoaded,
-                                  onStartGetImage: onStartGetImage,
-                                  onEndGetImage: onEndGetImage,
-                                  onChange: onChange,
-                                  isDirectUpload:
-                                      isDirectUpload
-                                          ? uploadUrl == null || uploadUrl != ""
-                                              ? true
-                                              : false
-                                          : false,
-                                );
-                              } else if (galery == true) {
-                                controller.getImages(
-                                  camera: false,
-                                  imageQuality: imageQuality ?? 30,
-                                  onImageLoaded: onImageLoaded,
-                                  onStartGetImage: onStartGetImage,
-                                  onEndGetImage: onEndGetImage,
-                                  onChange: onChange,
-                                  isDirectUpload:
-                                      isDirectUpload
-                                          ? uploadUrl == null || uploadUrl != ""
-                                              ? true
-                                              : false
-                                          : false,
-                                );
-                              }
+                        final result = await memorySpaceCheck(context);
+                        if (!context.mounted) return;
+                        if (result == true) {
+                          if (value.state !=
+                              ImagePickerComponentState.disable) {
+                            if (camera == true && galery == true) {
+                              openModal(context);
+                            } else if (camera == true) {
+                              controller.getImages(
+                                camera: true,
+                                imageQuality: imageQuality ?? 30,
+                                onImageLoaded: onImageLoaded,
+                                onStartGetImage: onStartGetImage,
+                                onEndGetImage: onEndGetImage,
+                                onChange: onChange,
+                                isDirectUpload: isDirectUpload
+                                    ? uploadUrl == null || uploadUrl != ""
+                                          ? true
+                                          : false
+                                    : false,
+                                isDocumentScanner: isDocumentScanner,
+                              );
+                            } else if (galery == true) {
+                              controller.getImages(
+                                camera: false,
+                                imageQuality: imageQuality ?? 30,
+                                onImageLoaded: onImageLoaded,
+                                onStartGetImage: onStartGetImage,
+                                onEndGetImage: onEndGetImage,
+                                onChange: onChange,
+                                isDirectUpload: isDirectUpload
+                                    ? uploadUrl == null || uploadUrl != ""
+                                          ? true
+                                          : false
+                                    : false,
+                                isDocumentScanner: isDocumentScanner,
+                              );
                             }
                           }
-                        });
+                        }
                       }
-                  : () {},
-          child:
-              container != null
-                  ? container!((context) {
-                    if (onChange != null) {
-                      return isDirectUpload && !value.isUploaded
-                          ? prepearingUpload(value, context, onChange!)
-                          : SizedBox();
-                    } else {
-                      return const SizedBox();
-                    }
-                  }, value)
-                  : Center(
-                    child: Container(
-                      height: containerHeight ?? 100,
-                      width: containerWidth ?? 100,
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        border: Border.all(
-                          color: stateColor(context, value.state),
-                          style: BorderStyle.solid,
-                        ),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(5),
-                        ),
+              : () {},
+          child: container != null
+              ? container!((context) {
+                  if (onChange != null) {
+                    return isDirectUpload && !value.isUploaded
+                        ? prepearingUpload(value, context, onChange!)
+                        : SizedBox();
+                  } else {
+                    return const SizedBox();
+                  }
+                }, value)
+              : Center(
+                  child: Container(
+                    height: containerHeight ?? 100,
+                    width: containerWidth ?? 100,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      border: Border.all(
+                        color: stateColor(context, value.state),
+                        style: BorderStyle.solid,
                       ),
-                      child: Center(child: widgetBuilder(value, context)),
+                      borderRadius: const BorderRadius.all(Radius.circular(5)),
                     ),
+                    child: Center(child: widgetBuilder(value, context)),
                   ),
+                ),
         );
       },
     );
@@ -250,38 +249,35 @@ class ImagePickerComponent extends StatelessWidget {
                         borderRadius: BorderRadius.only(
                           topLeft: const Radius.circular(20),
                           topRight: const Radius.circular(20),
-                          bottomLeft:
-                              popUpAlign == Alignment.center
-                                  ? const Radius.circular(20)
-                                  : Radius.zero,
-                          bottomRight:
-                              popUpAlign == Alignment.center
-                                  ? const Radius.circular(20)
-                                  : Radius.zero,
+                          bottomLeft: popUpAlign == Alignment.center
+                              ? const Radius.circular(20)
+                              : Radius.zero,
+                          bottomRight: popUpAlign == Alignment.center
+                              ? const Radius.circular(20)
+                              : Radius.zero,
                         ),
                       ),
-                  child:
-                      popUpChild != null
-                          ? popUpChild!(
-                            () {
-                              openCamera(context);
-                            },
-                            () {
-                              openGalery(context);
-                            },
-                          )
-                          : Column(
-                            children: <Widget>[
-                              Text(
-                                selectPhotoLabel ?? "Select Photo",
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              const SizedBox(height: 15),
-                              buttonGalery != null
-                                  ? buttonGalery!(() {
+                  child: popUpChild != null
+                      ? popUpChild!(
+                          () {
+                            openCamera(context);
+                          },
+                          () {
+                            openGalery(context);
+                          },
+                        )
+                      : Column(
+                          children: <Widget>[
+                            Text(
+                              selectPhotoLabel ?? "Select Photo",
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 15),
+                            buttonGalery != null
+                                ? buttonGalery!(() {
                                     openGalery(context);
                                   })
-                                  : SizedBox(
+                                : SizedBox(
                                     height: 35,
                                     width: 200,
                                     child: ElevatedButton(
@@ -289,10 +285,9 @@ class ImagePickerComponent extends StatelessWidget {
                                         openCamera(context);
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
+                                        backgroundColor: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
                                       ),
                                       child: Text(
                                         openCameraLabel ?? "Camera",
@@ -303,12 +298,12 @@ class ImagePickerComponent extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                              const SizedBox(height: 10),
-                              buttonGalery != null
-                                  ? buttonGalery!(() {
+                            const SizedBox(height: 10),
+                            buttonGalery != null
+                                ? buttonGalery!(() {
                                     openGalery(context);
                                   })
-                                  : SizedBox(
+                                : SizedBox(
                                     height: 35,
                                     width: 200,
                                     child: ElevatedButton(
@@ -316,10 +311,9 @@ class ImagePickerComponent extends StatelessWidget {
                                         openGalery(context);
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
+                                        backgroundColor: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
                                       ),
                                       child: Text(
                                         openGaleryLabel ?? "Gallery",
@@ -330,8 +324,8 @@ class ImagePickerComponent extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                            ],
-                          ),
+                          ],
+                        ),
                 ),
               ),
             ),
@@ -341,50 +335,50 @@ class ImagePickerComponent extends StatelessWidget {
     );
   }
 
-  void openGalery(BuildContext context) {
+  void openGalery(BuildContext context) async {
     Navigator.of(context).pop();
     if (!(checkRequirement ?? true)) return;
-    memorySpaceCheck(context).then((result) {
-      if (result == true) {
-        controller.getImages(
-          camera: false,
-          imageQuality: imageQuality ?? 30,
-          onImageLoaded: onImageLoaded,
-          onStartGetImage: onStartGetImage,
-          onEndGetImage: onEndGetImage,
-          onChange: onChange,
-          isDirectUpload:
-              isDirectUpload
-                  ? uploadUrl == null || uploadUrl != ""
-                      ? true
-                      : false
-                  : false,
-        );
-      }
-    });
+    final result = await memorySpaceCheck(context);
+    if (!context.mounted) return;
+    if (result == true) {
+      controller.getImages(
+        camera: false,
+        imageQuality: imageQuality ?? 30,
+        onImageLoaded: onImageLoaded,
+        onStartGetImage: onStartGetImage,
+        onEndGetImage: onEndGetImage,
+        onChange: onChange,
+        isDirectUpload: isDirectUpload
+            ? uploadUrl == null || uploadUrl != ""
+                  ? true
+                  : false
+            : false,
+        isDocumentScanner: isDocumentScanner,
+      );
+    }
   }
 
-  void openCamera(BuildContext context) {
+  void openCamera(BuildContext context) async {
     Navigator.of(context).pop();
     if (!(checkRequirement ?? true)) return;
-    memorySpaceCheck(context).then((result) {
-      if (result == true) {
-        controller.getImages(
-          camera: true,
-          imageQuality: imageQuality ?? 30,
-          onImageLoaded: onImageLoaded,
-          onStartGetImage: onStartGetImage,
-          onEndGetImage: onEndGetImage,
-          onChange: onChange,
-          isDirectUpload:
-              isDirectUpload
-                  ? uploadUrl == null || uploadUrl != ""
-                      ? true
-                      : false
-                  : false,
-        );
-      }
-    });
+    final result = await memorySpaceCheck(context);
+    if (!context.mounted) return;
+    if (result == true) {
+      controller.getImages(
+        camera: true,
+        imageQuality: imageQuality ?? 30,
+        onImageLoaded: onImageLoaded,
+        onStartGetImage: onStartGetImage,
+        onEndGetImage: onEndGetImage,
+        onChange: onChange,
+        isDirectUpload: isDirectUpload
+            ? uploadUrl == null || uploadUrl != ""
+                  ? true
+                  : false
+            : false,
+        isDocumentScanner: isDocumentScanner,
+      );
+    }
   }
 
   static Color stateColor(
@@ -403,15 +397,13 @@ class ImagePickerComponent extends StatelessWidget {
       child: Stack(
         children: [
           Center(
-            child:
-                value.loadData
-                    ? !(uploadUrl == null || uploadUrl == "") &&
-                            !value.isUploaded
-                        ? prepearingUpload(value, context, onChange!)
-                        : immageWidget(value)
-                    : placeHolderContainer != null
-                    ? placeHolderContainer!(value)
-                    : placeHolder(),
+            child: value.loadData
+                ? !(uploadUrl == null || uploadUrl == "") && !value.isUploaded
+                      ? prepearingUpload(value, context, onChange!)
+                      : immageWidget(value)
+                : placeHolderContainer != null
+                ? placeHolderContainer!(value)
+                : placeHolder(),
           ),
         ],
       ),
@@ -461,61 +453,59 @@ class ImagePickerComponent extends StatelessWidget {
           Container(color: Colors.white.withValues(alpha: 0.8)),
           value.onProgressUpload
               ? Center(
-                child: Container(
-                  margin: EdgeInsets.only(
-                    left: (containerWidth ?? 100) * 10 / 100,
-                    right: (containerWidth ?? 100) * 10 / 100,
-                  ),
-                  padding: const EdgeInsets.all(0),
-                  width: containerWidth,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    borderRadius: const BorderRadius.all(Radius.circular(5)),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.primary,
-                      width: 1,
+                  child: Container(
+                    margin: EdgeInsets.only(
+                      left: (containerWidth ?? 100) * 10 / 100,
+                      right: (containerWidth ?? 100) * 10 / 100,
                     ),
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: AnimatedContainer(
-                      duration: Duration(
-                        milliseconds: value.onProgressUpload ? 500 : 1,
+                    padding: const EdgeInsets.all(0),
+                    width: containerWidth,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: const BorderRadius.all(Radius.circular(5)),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 1,
                       ),
-                      width:
-                          (containerWidth ?? 100) *
-                          (controller.percentageUpload / 100),
-                      decoration: BoxDecoration(
-                        color:
-                            value.state != ImagePickerComponentState.error
-                                ? Colors.green
-                                : Theme.of(context).colorScheme.error,
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(5),
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: AnimatedContainer(
+                        duration: Duration(
+                          milliseconds: value.onProgressUpload ? 500 : 1,
+                        ),
+                        width:
+                            (containerWidth ?? 100) *
+                            (controller.percentageUpload / 100),
+                        decoration: BoxDecoration(
+                          color: value.state != ImagePickerComponentState.error
+                              ? Colors.green
+                              : Theme.of(context).colorScheme.error,
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(5),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              )
+                )
               : Container(),
           Align(
             alignment: Alignment.topCenter,
-            child:
-                value.state == ImagePickerComponentState.error
-                    ? Container(
-                      margin: EdgeInsets.only(
-                        top: (containerHeight ?? 100) / 2 + 15,
+            child: value.state == ImagePickerComponentState.error
+                ? Container(
+                    margin: EdgeInsets.only(
+                      top: (containerHeight ?? 100) / 2 + 15,
+                    ),
+                    child: Text(
+                      uploadFailedTitle ?? "Upload Failed",
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
                       ),
-                      child: Text(
-                        uploadFailedTitle ?? "Upload Failed",
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      ),
-                    )
-                    : const SizedBox(),
+                    ),
+                  )
+                : const SizedBox(),
           ),
         ],
       ),
@@ -534,34 +524,34 @@ class ImagePickerComponent extends StatelessWidget {
           showDescription == false
               ? const SizedBox()
               : Align(
-                alignment: Alignment.bottomCenter,
-                child: GestureDetector(
-                  onTap: () {
-                    if (uploadUrl != null && uploadUrl != "") return;
-                    showModalDescription(value.context!);
-                  },
-                  child: Container(
-                    color: Theme.of(
-                      value.context!,
-                    ).colorScheme.primary.withValues(alpha: 0.9),
-                    padding: const EdgeInsets.all(5),
-                    width: double.infinity,
-                    height: 25,
-                    child: Center(
-                      child: Text(
-                        value.imageDescription ?? "add description",
-                        textAlign: TextAlign.center,
-                        softWrap: true,
-                        overflow: TextOverflow.fade,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
+                  alignment: Alignment.bottomCenter,
+                  child: GestureDetector(
+                    onTap: () {
+                      if (uploadUrl != null && uploadUrl != "") return;
+                      showModalDescription(value.context!);
+                    },
+                    child: Container(
+                      color: Theme.of(
+                        value.context!,
+                      ).colorScheme.primary.withValues(alpha: 0.9),
+                      padding: const EdgeInsets.all(5),
+                      width: double.infinity,
+                      height: 25,
+                      child: Center(
+                        child: Text(
+                          value.imageDescription ?? "add description",
+                          textAlign: TextAlign.center,
+                          softWrap: true,
+                          overflow: TextOverflow.fade,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
         ],
       ),
     );
@@ -570,14 +560,13 @@ class ImagePickerComponent extends StatelessWidget {
   Widget memoryImageMode(ImagePickerValue value) {
     return Container(
       margin: const EdgeInsets.all(8),
-      decoration:
-          value.valueUri != null
-              ? BoxDecoration(
-                image: DecorationImage(
-                  image: MemoryImage(value.valueUri!.contentAsBytes()),
-                ),
-              )
-              : null,
+      decoration: value.valueUri != null
+          ? BoxDecoration(
+              image: DecorationImage(
+                image: MemoryImage(value.valueUri!.contentAsBytes()),
+              ),
+            )
+          : null,
     );
   }
 
@@ -624,17 +613,17 @@ class ImagePickerComponent extends StatelessWidget {
                     children: [
                       TextFormField(
                         keyboardType: TextInputType.text,
-                        controller: TextEditingController(
-                            text:
-                                (controller.value.imageDescription ?? '')
+                        controller:
+                            TextEditingController(
+                                text: (controller.value.imageDescription ?? '')
                                     .toString(),
-                          )
-                          ..selection = TextSelection.collapsed(
-                            offset:
-                                ((controller.value.imageDescription ?? '')
-                                        .toString())
-                                    .length,
-                          ),
+                              )
+                              ..selection = TextSelection.collapsed(
+                                offset:
+                                    ((controller.value.imageDescription ?? '')
+                                            .toString())
+                                        .length,
+                              ),
                         textCapitalization: TextCapitalization.sentences,
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
@@ -664,60 +653,64 @@ class ImagePickerComponent extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 5),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.error,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 10,
+                SafeArea(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 5),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.error,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                              alignment: Alignment.center,
                             ),
-                            alignment: Alignment.center,
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).pop(false);
-                          },
-                          child: Text(
-                            cancelLabel ?? "Cancel",
-                            style: Theme.of(context).textTheme.bodyMedium!
-                                .copyWith(color: Colors.white),
+                            onPressed: () {
+                              Navigator.of(context).pop(false);
+                            },
+                            child: Text(
+                              cancelLabel ?? "Cancel",
+                              style: Theme.of(context).textTheme.bodyMedium!
+                                  .copyWith(color: Colors.white),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 5),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 10,
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 5),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                              alignment: Alignment.center,
                             ),
-                            alignment: Alignment.center,
-                          ),
-                          onPressed: () {
-                            formKey.currentState!.save();
-                            Navigator.of(context).pop(true);
-                          },
-                          child: Text(
-                            saveLabel ?? "Save",
-                            style: Theme.of(context).textTheme.bodyMedium!
-                                .copyWith(color: Colors.white),
+                            onPressed: () {
+                              formKey.currentState!.save();
+                              Navigator.of(context).pop(true);
+                            },
+                            child: Text(
+                              saveLabel ?? "Save",
+                              style: Theme.of(context).textTheme.bodyMedium!
+                                  .copyWith(color: Colors.white),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -761,17 +754,39 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
     required bool isDirectUpload,
     String? permissionTitle,
     String? permissionBody,
+    bool isDocumentScanner = false,
   }) async {
     onStartGetImage?.call();
+
+    // Capture context before any async operations to avoid using BuildContext across async gaps
+    final BuildContext? ctx = value.context;
+    if (ctx == null) return false;
+
     try {
       PickedFile? picker;
       if (camera) {
         PermissionStatus access = await Permission.camera.status;
         if (access.isGranted == true) {
-          picker = await openCamrea(value.context!);
+          if (isDocumentScanner) {
+            List<String> documentPaths =
+                await CunningDocumentScanner.getPictures(
+                  isGalleryImportAllowed: false,
+                  noOfPages: 1,
+                  iosScannerOptions: IosScannerOptions(
+                    imageFormat: IosImageFormat.jpg,
+                    jpgCompressionQuality: 0.5,
+                  ),
+                ) ??
+                [];
+            if (documentPaths.isNotEmpty) {
+              picker = PickedFile(documentPaths.first);
+            }
+          } else {
+            picker = await openCamrea(ctx);
+          }
         } else {
           openModalErrorMessage(
-            value.context!,
+            ctx,
             title: permissionTitle ?? "Permission Required",
             body:
                 permissionBody ??
@@ -782,13 +797,29 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
         await Permission.photos.request();
         PermissionStatus access2 = await Permission.photos.status;
         if (access2.isGranted == true) {
-          XFile? xFile = await ImagePicker().pickMedia(
-            imageQuality: imageQuality,
-          );
-          picker = PickedFile(xFile!.path);
+          if (isDocumentScanner) {
+            List<String> documentPaths =
+                await CunningDocumentScanner.getPictures(
+                  noOfPages: 1,
+                  isGalleryImportAllowed: true,
+                  iosScannerOptions: IosScannerOptions(
+                    imageFormat: IosImageFormat.jpg,
+                    jpgCompressionQuality: 0.5,
+                  ),
+                ) ??
+                [];
+            if (documentPaths.isNotEmpty) {
+              picker = PickedFile(documentPaths.first);
+            }
+          } else {
+            XFile? xFile = await ImagePicker().pickMedia(
+              imageQuality: imageQuality,
+            );
+            picker = PickedFile(xFile!.path);
+          }
         } else {
           openModalErrorMessage(
-            value.context!,
+            ctx,
             title: permissionTitle ?? "Permission Required",
             body:
                 permissionBody ??
@@ -912,12 +943,11 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
 
   bool get isValid {
     bool isValid = (getBase64() == null || getBase64() == "") ? false : true;
-    isValid =
-        isValid == false
-            ? value.uploadedUrl == null || value.uploadedUrl == ""
-                ? false
-                : true
-            : isValid;
+    isValid = isValid == false
+        ? value.uploadedUrl == null || value.uploadedUrl == ""
+              ? false
+              : true
+        : isValid;
     return isValid;
   }
 
@@ -995,18 +1025,21 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
   }
 
   void setUploadedUrl({String? jsonKey}) {
-    value.uploadedUrl =
-        json.decode(value.uploadedResponse.toString())[jsonKey ?? "fileUrl"];
+    value.uploadedUrl = json.decode(
+      value.uploadedResponse.toString(),
+    )[jsonKey ?? "fileUrl"];
   }
 
   void setfilePath({String? jsonKey}) {
-    value.filePath =
-        json.decode(value.uploadedResponse.toString())[jsonKey ?? "filePath"];
+    value.filePath = json.decode(
+      value.uploadedResponse.toString(),
+    )[jsonKey ?? "filePath"];
   }
 
   void setUploadedId({String? jsonKey}) {
-    value.uploadedId =
-        json.decode(value.uploadedResponse.toString())[jsonKey ?? "imageId"];
+    value.uploadedId = json.decode(
+      value.uploadedResponse.toString(),
+    )[jsonKey ?? "imageId"];
   }
 
   void setState(VoidCallback fn) {
@@ -1059,14 +1092,12 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
                         borderRadius: BorderRadius.only(
                           topLeft: const Radius.circular(20),
                           topRight: const Radius.circular(20),
-                          bottomLeft:
-                              popUpAlign == Alignment.center
-                                  ? const Radius.circular(20)
-                                  : Radius.zero,
-                          bottomRight:
-                              popUpAlign == Alignment.center
-                                  ? const Radius.circular(20)
-                                  : Radius.zero,
+                          bottomLeft: popUpAlign == Alignment.center
+                              ? const Radius.circular(20)
+                              : Radius.zero,
+                          bottomRight: popUpAlign == Alignment.center
+                              ? const Radius.circular(20)
+                              : Radius.zero,
                         ),
                       ),
                   child: Column(

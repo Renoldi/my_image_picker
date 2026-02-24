@@ -4,6 +4,7 @@ import 'package:json_view/json_view.dart';
 import 'package:my_image_picker/my_image_picker.dart';
 import 'package:my_image_picker/my_multiple_image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:logger/logger.dart';
 
 class OfflineExample extends StatefulWidget {
   const OfflineExample({super.key, required this.title, required this.drawer});
@@ -45,27 +46,28 @@ class _OfflineExampleState extends State<OfflineExample> {
               decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
               child: SingleChildScrollView(
                 child: MultipleImagePickerComponent(
+                  isDocumentScanner: true,
                   controller: controller,
                   size: 150,
                   canReupload: true,
                   onChange: (controller, index) {
-                    debugPrint("image index $index changed");
+                    Logger().e("image index $index changed");
                     if (index == null) {
                       if (kDebugMode) {
-                        print(controller.getImageData().last?.toJson());
+                        Logger().d(controller.getImageData().last?.toJson());
                       }
                     } else {
                       if (kDebugMode) {
-                        print(controller.getImageData()[index]?.toJson());
+                        Logger().d(controller.getImageData()[index]?.toJson());
                       }
                     }
                     setState(() {});
                   },
                   onDeleteImage: (p0, index) async {
-                    debugPrint("image index $index changed");
+                    Logger().d("image index $index changed");
                     controller.getImageData().forEach((element) {
                       if (kDebugMode) {
-                        print(element?.toJson());
+                        Logger().d(element?.toJson());
                       }
                     });
                     setState(() {});
@@ -82,8 +84,10 @@ class _OfflineExampleState extends State<OfflineExample> {
               width: double.infinity,
               decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
               child: JsonView(
-                json:
-                    controller.getImageData().map((e) => e?.toJson()).toList(),
+                json: controller
+                    .getImageData()
+                    .map((e) => e?.toJson())
+                    .toList(),
                 arrow: const Icon(Icons.arrow_right_rounded),
               ),
             ),
