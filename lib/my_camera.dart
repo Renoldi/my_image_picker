@@ -201,7 +201,7 @@ class CameraComponentState extends State<CameraComponent> {
                           CameraComponensStates.onOpenedCamera,
                         );
                       },
-                      child: const Icon(
+                      child: const FaIcon(
                         FontAwesomeIcons.circleXmark,
                         color: Colors.white,
                         size: 50,
@@ -227,7 +227,7 @@ class CameraComponentState extends State<CameraComponent> {
                           ).pop(widget.controller.value.captured);
                         }
                       },
-                      child: const Icon(
+                      child: const FaIcon(
                         FontAwesomeIcons.circleCheck,
                         color: Colors.white,
                         size: 50,

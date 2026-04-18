@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 typedef OnUploadProgressCallback = void Function(int sentBytes, int totalBytes);
@@ -10,9 +9,9 @@ typedef OnUploadProgressCallback = void Function(int sentBytes, int totalBytes);
 class FileServiceUtil {
   // static String baseUrl = ;
   static Future<String> fileUploadMultipart({
-    @required File? file,
-    @required String? url,
-    @required String? description,
+    required File? file,
+    required String? url,
+    required String? description,
     String? field,
     String? token,
     String? descriptionField,
@@ -22,8 +21,8 @@ class FileServiceUtil {
   }) async {
     assert(file != null);
 
-    final httpClient =
-        HttpClient()..connectionTimeout = const Duration(seconds: 10);
+    final httpClient = HttpClient()
+      ..connectionTimeout = const Duration(seconds: 10);
 
     Map<String, String> query = {};
 

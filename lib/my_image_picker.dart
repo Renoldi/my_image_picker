@@ -762,6 +762,8 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
     final BuildContext? ctx = value.context;
     if (ctx == null) return false;
 
+    bool isMounted() => ctx is Element && (ctx).mounted;
+
     try {
       PickedFile? picker;
       if (camera) {
@@ -785,13 +787,16 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
             picker = await openCamrea(ctx);
           }
         } else {
-          openModalErrorMessage(
-            ctx,
-            title: permissionTitle ?? "Permission Required",
-            body:
-                permissionBody ??
-                "Please allow this app to access camera to continue",
-          );
+          if (isMounted()) {
+            // Only use ctx if still mounted after async gap
+            openModalErrorMessage(
+              ctx,
+              title: permissionTitle ?? "Permission Required",
+              body:
+                  permissionBody ??
+                  "Please allow this app to access camera to continue",
+            );
+          }
         }
       } else {
         await Permission.photos.request();
@@ -818,13 +823,16 @@ class ImagePickerController extends ValueNotifier<ImagePickerValue> {
             picker = PickedFile(xFile!.path);
           }
         } else {
-          openModalErrorMessage(
-            ctx,
-            title: permissionTitle ?? "Permission Required",
-            body:
-                permissionBody ??
-                "Please allow this app to access your gallery to continue",
-          );
+          if (isMounted()) {
+            // Only use ctx if still mounted after async gap
+            openModalErrorMessage(
+              ctx,
+              title: permissionTitle ?? "Permission Required",
+              body:
+                  permissionBody ??
+                  "Please allow this app to access your gallery to continue",
+            );
+          }
         }
       }
 
