@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:photo_view/photo_view.dart';
 
 class CameraComponent extends StatefulWidget {
@@ -201,8 +200,8 @@ class CameraComponentState extends State<CameraComponent> {
                           CameraComponensStates.onOpenedCamera,
                         );
                       },
-                      child: const FaIcon(
-                        FontAwesomeIcons.circleXmark,
+                      child: const Icon(
+                        Icons.cancel,
                         color: Colors.white,
                         size: 50,
                       ),
@@ -227,8 +226,8 @@ class CameraComponentState extends State<CameraComponent> {
                           ).pop(widget.controller.value.captured);
                         }
                       },
-                      child: const FaIcon(
-                        FontAwesomeIcons.circleCheck,
+                      child: const Icon(
+                        Icons.check_circle,
                         color: Colors.white,
                         size: 50,
                       ),

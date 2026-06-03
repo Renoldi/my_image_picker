@@ -14,7 +14,7 @@ dependencies:
     sdk: flutter
   flutter_image_compress: any
   flutter_json_view: any
-  font_awesome_flutter: any
+  # font_awesome_flutter: any
   http: any
   image_picker: any
   path_provider: any

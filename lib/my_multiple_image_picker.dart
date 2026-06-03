@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:my_image_picker/my_image_picker.dart';
 import 'package:my_image_picker/type.dart';
 
@@ -261,7 +260,7 @@ class MultipleImagePickerComponent extends StatelessWidget {
                         }
                       },
                       child: IconButton(
-                        icon: const FaIcon(FontAwesomeIcons.circleXmark),
+                        icon: const Icon(Icons.cancel),
                         onPressed: () {
                           if (onDeleteImage != null) {
                             onDeleteImage!(imagePickerController, index).then((
